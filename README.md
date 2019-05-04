@@ -3,8 +3,11 @@ Repositorio creado para poner poder guardar todo el codigo de Servidor Multithre
 Este codigo se puede mejorar!
 
 Funcionalidades hasta el momento:
+
 -Envio de mensajes al servidor desde muchos clientes conectados a este
+
 -Reconocimiento del IP y HOST del cliente.
+
 -Reconocer cuando un cliente se desconecta y mostrar por pantalla su FileDirector
 
 Importante:
