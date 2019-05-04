@@ -1,5 +1,7 @@
 # csMulti
-Repositorio creado para poner poder guardar todo el codigo de Servidor Multithreading que nos servira para el TP. Este codigo se puede mejorar!
+Repositorio creado para poner poder guardar todo el codigo de Servidor Multithreading que nos servira para el TP. 
+Este codigo se puede mejorar!
+
 Funcionalidades hasta el momento:
 -Envio de mensajes al servidor desde muchos clientes conectados a este
 -Reconocimiento del IP y HOST del cliente.
