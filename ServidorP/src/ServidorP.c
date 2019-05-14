@@ -25,11 +25,11 @@ typedef struct pthread_arg_t {
 /* Thread routine to serve connection to client. */
 void *pthread_routine(void *arg);
 
-/* Signal handler to handle SIGTERM and SIGINT signals. */
-void signal_handler(int signal_number);
+void recibir_mensaje(int socket_cliente);
+void* recibir_buffer(int* size, int socket_cliente);
 
 int main(int argc, char *argv[]) {
-    //int port;
+
 	int socketServidor, nuevoClienteSocket;
     struct sockaddr_in direccionServidor;
     pthread_attr_t pthread_attr;
@@ -37,12 +37,6 @@ int main(int argc, char *argv[]) {
     pthread_t pthread;
     socklen_t client_address_len;
 
-    /* Get port from command line arguments or stdin.
-    port = argc > 1 ? atoi(argv[1]) : 0;
-    if (!port) {
-        printf("Enter Port: ");
-        scanf("%d", &port);
-    }*/
 
     /* Initialise IPv4 address. */
     memset(&direccionServidor, 0, sizeof direccionServidor);
@@ -68,20 +62,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     printf("Estoy escuchando \n");
-
-    /* Assign signal handlers to signals. */
-    if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-        perror("ERROR: signal");
-        exit(1);
-    }
-    if (signal(SIGTERM, signal_handler) == SIG_ERR) {
-        perror("signal");
-        exit(1);
-    }
-    if (signal(SIGINT, signal_handler) == SIG_ERR) {
-        perror("signal");
-        exit(1);
-    }
 
     /* Initialise pthread attribute to create detached threads. */
     if (pthread_attr_init(&pthread_attr) != 0) {
@@ -120,7 +100,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        usleep(3000000);//3 segundo
+        //usleep(3000000);//3 segundo
         /* Initialise pthread argument. Basicamente guardo el socket en una estrucutra
          y lo voy a pasar por parametro en la funcion que va a ejecutar en un thread*/
         pthread_arg->newClientSocket = nuevoClienteSocket;
@@ -138,46 +118,46 @@ int main(int argc, char *argv[]) {
         //Como cerrar el servidor?
     }
 
-    /* close(socket_fd);
-     * TODO: If you really want to close the socket, you would do it in
-     * signal_handler(), meaning socket_fd would need to be a global variable.
-     */
+    /* close(socket_fd);*/
+
     return 0;
 }
 
 void *pthread_routine(void *arg) {
     pthread_arg_t *pthread_arg = (pthread_arg_t *)arg;
-    int new_socket_fd = pthread_arg->newClientSocket;//sino lo declaro en un nuevo int newCLientSocket me devuelve 0
+    int newClienteSocket = pthread_arg->newClientSocket;//sino lo declaro en un nuevo int newCLientSocket me devuelve 0
     struct sockaddr_in client_address = pthread_arg->direccionCliente;
     /* TODO: Get arguments passed to threads here. See lines 22 and 116. */
-
     free(arg);
 
-    char* buffer=malloc(1000);
     while(1){
-		int bytesRecibidos= recv(new_socket_fd,buffer,1000,0);
-		if(bytesRecibidos <= 0){
-			printf("El cliente numero %d se desconecto", new_socket_fd);
-		    usleep(2000000);
-			perror("\n");
-			break;
-		}
-		buffer[bytesRecibidos]= '\0';
-
-		printf("El cliente numero %d dijo: %s",new_socket_fd, buffer);
+    	recibir_mensaje(newClienteSocket);
     }
-    free(buffer);
 
     /* TODO: Put client interaction code here. For example, use
      * write(new_socket_fd,,) and read(new_socket_fd,,) to send and receive
      * messages with the client.
      */
 
-    close(new_socket_fd);
+    close(newClienteSocket);
     return NULL;
 }
 
-void signal_handler(int signal_number) {
-    /* TODO: Put exit cleanup code here. */
-    exit(0);
+void* recibir_buffer(int* size, int socket_cliente)
+{
+	void * buffer;
+
+	recv(socket_cliente, size, sizeof(int), 0);
+	buffer = malloc(*size);
+	recv(socket_cliente, buffer, *size, 0);
+
+	return buffer;
+}
+
+void recibir_mensaje(int socket_cliente)
+{
+	int size;
+	char* buffer = recibir_buffer(&size, socket_cliente);
+	printf("Me llego el mensaje %s", buffer);
+	free(buffer);
 }
